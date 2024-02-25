@@ -4,6 +4,8 @@ from luma.oled.device import sh1106
 from PIL import ImageFont
 import psutil
 from pathlib import Path
+import time
+
 
 # Inicialización del bus I2C y dirección del dispositivo OLED
 serial = i2c(port=1, address=0x3C)
