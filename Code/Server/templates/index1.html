@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heart Rate and Oxygen Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .chart-container {
+            width: 200px;
+            height: 200px;
+            margin: auto;
+        }
+        #patientForm {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #monitoringSection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="patientForm">
+        <label for="patientName">Enter Patient's Name:</label>
+        <input type="text" id="patientName" name="patientName">
+        <button onclick="startMonitoring()">Start Monitoring</button>
+    </div>
+    <div id="monitoringSection">
+        <h1>Patient: <span id="patientNameDisplay"></span></h1>
+        <div class="chart-container">
+            <i class="fas fa-heartbeat"></i> Heart Rate
+            <canvas id="heartRateChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <i class="fas fa-lungs"></i> Oxygen Level
+            <canvas id="oxygenLevelChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function startMonitoring() {
+            var patientName = document.getElementById('patientName').value;
+            document.getElementById('patientNameDisplay').innerText = patientName;
+            document.getElementById('patientForm').style.display = 'none';
+            document.getElementById('monitoringSection').style.display = 'block';
+            initCharts();
+        }
+
+        function initCharts() {
+            const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
+            const heartRateChart = new Chart(heartRateCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        label: 'Heart Rate',
+                        data: [75, 25], // Placeholder data
+                        backgroundColor: ['rgb(255, 99, 132)', 'rgba(255, 99, 132, 0.1)'],
+                    }],
+                    labels: ['Heart Rate', 'Remaining'],
+                },
+                options: {
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '80%',
+                }
+            });
+
+            const oxygenLevelCtx = document.getElementById('oxygenLevelChart').getContext('2d');
+            const oxygenLevelChart = new Chart(oxygenLevelCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        label: 'Oxygen Level',
+                        data: [98, 2], // Placeholder data
+                        backgroundColor: ['rgb(54, 162, 235)', 'rgba(54, 162, 235, 0.1)'],
+                    }],
+                    labels: ['Oxygen Level', 'Remaining'],
+                },
+                options: {
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '80%',
+                }
+            });
+        }
+
+        // Add AJAX call to update charts with real-time data
+    </script>
+</body>
+</html>

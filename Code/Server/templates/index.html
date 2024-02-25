@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heart Rate and Oxygen Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .chart-container {
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            margin: 20px;
+            position: relative;
+        }
+        #patientForm {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #monitoringSection {
+            text-align: center;
+            display: none;
+        }
+        .chart-text {
+            position: absolute;
+            font-size: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Arial', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="patientForm">
+        <label for="patientName">Enter Patient's Name:</label>
+        <input type="text" id="patientName" name="patientName">
+        <button onclick="startMonitoring()">Start Monitoring</button>
+    </div>
+    <div id="monitoringSection">
+        <h1>Patient: <span id="patientNameDisplay"></span></h1>
+        <div class="chart-container">
+            <i class="fas fa-heartbeat"></i> Heart Rate
+            <canvas id="heartRateChart"></canvas>
+            <div class="chart-text" id="heartRateText"></div>
+        </div>
+        <div class="chart-container">
+            <i class="fas fa-lungs"></i> Oxygen Level
+            <canvas id="oxygenLevelChart"></canvas>
+            <div class="chart-text" id="oxygenLevelText"></div>
+        </div>
+    </div>
+
+    <script>
+        function startMonitoring() {
+            var patientName = document.getElementById('patientName').value;
+            document.getElementById('patientNameDisplay').innerText = patientName;
+            document.getElementById('patientForm').style.display = 'none';
+            document.getElementById('monitoringSection').style.display = 'block';
+            initCharts();
+        }
+
+        function initCharts() {
+            const updateChart = (chart, textElementId, value) => {
+                const data = chart.data.datasets[0].data;
+                data[0] = value;
+                data[1] = 100 - value; // Adjust the "remaining" part dynamically
+                document.getElementById(textElementId).innerText = value + '%'; // Display value as a percentage
+                chart.update();
+            };
+
+            const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
+            const heartRateChart = new Chart(heartRateCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [75, 25], // Placeholder data
+                        backgroundColor: ['rgb(255, 99, 132)', 'transparent'],
+                        borderColor: ['rgb(255, 99, 132)'],
+                        borderWidth: 1
+                    }],
+                },
+                options: {
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '80%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    animation: {
+                        onComplete: function() {
+                            document.getElementById('heartRateText').innerText = this.data.datasets[0].data[0] + ' BPM';
+                        }
+                    }
+                }
+            });
+
+            const oxygenLevelCtx = document.getElementById('oxygenLevelChart').getContext('2d');
+            const oxygenLevelChart = new Chart(oxygenLevelCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [98, 2], // Placeholder data
+                        backgroundColor: ['rgb(54, 162, 235)', 'transparent'],
+                        borderColor: ['rgb(54, 162, 235)'],
+                        borderWidth: 1
+                    }],
+                },
+                options: {
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '80%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    animation: {
+                        onComplete: function() {
+                            document.getElementById('oxygenLevelText').innerText = this.data.datasets[0].data[0] + '%';
+                        }
+                    }
+                }
+            });
+
+            // Example data update, replace with actual sensor data retrieval
+            setInterval(() => {
+                updateChart(heartRateChart, 'heartRateText', Math.floor(Math.random() * 100));
+                updateChart(oxygenLevelChart, 'oxygenLevelText', 98); // Simulated stable oxygen level
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

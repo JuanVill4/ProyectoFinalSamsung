@@ -36,4 +36,4 @@ while True:
             draw.text((0, 16), f"SpO2: {int(sp)}%")
         
     # Esperar 10 segundos antes de la próxima actualización
-    #time.sleep(1)
+    time.sleep(1)
