@@ -15,10 +15,12 @@ class HeartRateMonitor(object):
 
     def __init__(self, print_raw=False, print_result=False):
         self.bpm = 0
+        self.spo2 = 0
         if print_raw is True:
             print('IR, Red')
         self.print_raw = print_raw
         self.print_result = print_result
+
 
     def run_sensor(self):
         sensor = MAX30102()
@@ -46,6 +48,8 @@ class HeartRateMonitor(object):
 
                 if len(ir_data) == 100:
                     bpm, valid_bpm, spo2, valid_spo2 = hrcalc.calc_hr_and_spo2(ir_data, red_data)
+                    if valid_spo2:
+                        self.spo2 = spo2
                     if valid_bpm:
                         bpms.append(bpm)
                         while len(bpms) > 4:
@@ -56,7 +60,7 @@ class HeartRateMonitor(object):
                             if self.print_result:
                                 print("Finger not detected")
                         if self.print_result:
-                            print("BPM: {0}, SpO2: {1}".format(self.bpm, spo2))
+                            print("BPM: {0}, SpO2: {1}".format(self.bpm, self.spo2))
 
             time.sleep(self.LOOP_TIME)
 

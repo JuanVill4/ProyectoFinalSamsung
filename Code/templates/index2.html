@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor de Frecuencia Cardíaca y Oxigenación</title>
+    <script>
+        // Función para solicitar los datos del sensor y actualizar la página
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    // Actualiza los elementos del DOM con los nuevos valores
+                    document.getElementById('heartRate').textContent = data.heart_rate;
+                    document.getElementById('oxygenLevel').textContent = data.oxygen_level;
+                })
+                .catch(error => console.error('Error al obtener los datos:', error));
+        }
+
+        // Llama a fetchData cada segundo (1000 milisegundos)
+        setInterval(fetchData, 1000);
+    </script>
+</head>
+<body>
+    <h1>Monitor de Frecuencia Cardíaca y Oxigenación</h1>
+    <p>Frecuencia Cardíaca: <span id="heartRate">0</span> BPM</p>
+    <p>Nivel de Oxígeno: <span id="oxygenLevel">0</span>%</p>
+</body>
+</html>
