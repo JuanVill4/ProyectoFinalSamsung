@@ -22,7 +22,7 @@ sensor_thread.start()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index1.html')
 
 @app.route('/data')
 def data():

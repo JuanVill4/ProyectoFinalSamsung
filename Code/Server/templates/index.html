@@ -7,27 +7,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         .chart-container {
-            display: inline-block;
-            width: 200px;
-            height: 200px;
-            margin: 20px;
-            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         #patientForm {
             text-align: center;
             margin-top: 20px;
         }
         #monitoringSection {
-            text-align: center;
             display: none;
         }
-        .chart-text {
-            position: absolute;
-            font-size: 20px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Arial', sans-serif;
+        .charts-flex-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        h1 {
+            font-size: 2.5em;
+        }
+        .chart-title {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        .fa-heartbeat, .fa-lungs {
+            font-size: 2em;
         }
     </style>
 </head>
@@ -39,15 +47,17 @@
     </div>
     <div id="monitoringSection">
         <h1>Patient: <span id="patientNameDisplay"></span></h1>
-        <div class="chart-container">
-            <i class="fas fa-heartbeat"></i> Heart Rate
-            <canvas id="heartRateChart"></canvas>
-            <div class="chart-text" id="heartRateText"></div>
-        </div>
-        <div class="chart-container">
-            <i class="fas fa-lungs"></i> Oxygen Level
-            <canvas id="oxygenLevelChart"></canvas>
-            <div class="chart-text" id="oxygenLevelText"></div>
+        <div class="charts-flex-container">
+            <div class="chart-container">
+                <i class="fas fa-heartbeat"></i>
+                <div class="chart-title">Heart Rate</div>
+                <canvas id="heartRateChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <i class="fas fa-lungs"></i>
+                <div class="chart-title">Oxygen Level</div>
+                <canvas id="oxygenLevelChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -59,25 +69,16 @@
             document.getElementById('monitoringSection').style.display = 'block';
             initCharts();
         }
-
+    
         function initCharts() {
-            const updateChart = (chart, textElementId, value) => {
-                const data = chart.data.datasets[0].data;
-                data[0] = value;
-                data[1] = 100 - value; // Adjust the "remaining" part dynamically
-                document.getElementById(textElementId).innerText = value + '%'; // Display value as a percentage
-                chart.update();
-            };
-
             const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
-            const heartRateChart = new Chart(heartRateCtx, {
+            new Chart(heartRateCtx, {
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                        data: [75, 25], // Placeholder data
-                        backgroundColor: ['rgb(255, 99, 132)', 'transparent'],
-                        borderColor: ['rgb(255, 99, 132)'],
-                        borderWidth: 1
+                        label: 'Heart Rate',
+                        data: [75, 125], // 75 es el valor actual, 125 es el valor restante hasta 200
+                        backgroundColor: ['rgb(255, 99, 132)', 'rgba(255, 99, 132, 0.1)'],
                     }],
                 },
                 options: {
@@ -89,26 +90,27 @@
                             display: false
                         },
                         tooltip: {
-                            enabled: false
-                        }
-                    },
-                    animation: {
-                        onComplete: function() {
-                            document.getElementById('heartRateText').innerText = this.data.datasets[0].data[0] + ' BPM';
+                            callbacks: {
+                                label: function(context) {
+                                    // Personaliza el texto del tooltip
+                                    if (context.datasetIndex === 0 && context.dataIndex === 0) { // Asegura que solo se modifique para el valor principal
+                                        return `Heart Rate: ${context.raw}`;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             });
-
+    
             const oxygenLevelCtx = document.getElementById('oxygenLevelChart').getContext('2d');
-            const oxygenLevelChart = new Chart(oxygenLevelCtx, {
+            new Chart(oxygenLevelCtx, {
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                        data: [98, 2], // Placeholder data
-                        backgroundColor: ['rgb(54, 162, 235)', 'transparent'],
-                        borderColor: ['rgb(54, 162, 235)'],
-                        borderWidth: 1
+                        label: 'Oxygen Level',
+                        data: [98, 2], // 98 es el valor actual, 2 es el valor restante hasta 100
+                        backgroundColor: ['rgb(54, 162, 235)', 'rgba(54, 162, 235, 0.1)'],
                     }],
                 },
                 options: {
@@ -120,23 +122,20 @@
                             display: false
                         },
                         tooltip: {
-                            enabled: false
-                        }
-                    },
-                    animation: {
-                        onComplete: function() {
-                            document.getElementById('oxygenLevelText').innerText = this.data.datasets[0].data[0] + '%';
+                            callbacks: {
+                                label: function(context) {
+                                    // Personaliza el texto del tooltip
+                                    if (context.datasetIndex === 0 && context.dataIndex === 0) { // Asegura que solo se modifique para el valor principal
+                                        return `Oxygen Level: ${context.raw}`;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             });
-
-            // Example data update, replace with actual sensor data retrieval
-            setInterval(() => {
-                updateChart(heartRateChart, 'heartRateText', Math.floor(Math.random() * 100));
-                updateChart(oxygenLevelChart, 'oxygenLevelText', 98); // Simulated stable oxygen level
-            }, 2000);
         }
     </script>
+    
 </body>
 </html>
