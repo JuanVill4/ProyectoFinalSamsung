@@ -2,188 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Heart Rate and Oxygen Monitor</title>
+    <title>Monitor de Frecuencia Cardíaca y Oxigenación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        .chart-container {
-            width: 400px;
-            height: 400px;
-            margin: 20px auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        body {
+            margin: 0 auto;
+            max-width: 600px; /* Limita el ancho máximo para más espacio a los costados */
+            padding: 20px;
         }
-        #patientForm {
-            text-align: center;
-            margin-top: 20px;
+        .progress-container {
+            width: 100%;
+            background-color: #eee;
+            border-radius: 10px;
+            overflow: hidden;
         }
-        #monitoringSection {
-            display: none;
+        .progress-bar {
+            height: 30px;
+            border-radius: 10px;
+            transition: width 0.3s ease;
         }
-        .charts-flex-container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
+        .heart-rate-bar {
+            background-color: #FF6384;
         }
-        h1 {
-            font-size: 2.5em;
+        .oxygen-level-bar {
+            background-color: #36A2EB;
         }
-        .chart-title {
-            font-size: 1.5em;
+        .metric {
+            font-size: 1.5em; /* Aumenta el tamaño de los nombres e íconos */
             margin: 10px 0;
         }
-        .fa-heartbeat, .fa-lungs {
-            font-size: 2em;
+        .value {
+            font-size: 1.2em; /* Tamaño del indicador numérico */
         }
     </style>
 </head>
 <body>
-    <div id="patientForm">
-        <label for="patientName">Enter Patient's Name:</label>
-        <input type="text" id="patientName" name="patientName">
-        <button onclick="startMonitoring()">Start Monitoring</button>
+    <div class="metric">
+        <i class="fas fa-heartbeat" style="color: #FF6384;"></i> Frecuencia Cardíaca: <span id="heartRateValue" class="value">0 BPM</span>
     </div>
-    <div id="monitoringSection">
-        <h1>Patient: <span id="patientNameDisplay"></span></h1>
-        <div class="charts-flex-container">
-            <div class="chart-container">
-                <i class="fas fa-heartbeat"></i>
-                <div class="chart-title">Heart Rate</div>
-                <canvas id="heartRateChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <i class="fas fa-lungs"></i>
-                <div class="chart-title">Oxygen Level</div>
-                <canvas id="oxygenLevelChart"></canvas>
-            </div>
-        </div>
+    <div class="progress-container">
+        <div id="heartRateBar" class="progress-bar heart-rate-bar" style="width: 0%"></div>
+    </div>
+    <div class="metric">
+        <i class="fas fa-lungs" style="color: #36A2EB;"></i> Nivel de Oxígeno: <span id="oxygenLevelValue" class="value">0%</span>
+    </div>
+    <div class="progress-container">
+        <div id="oxygenLevelBar" class="progress-bar oxygen-level-bar" style="width: 0%"></div>
     </div>
 
     <script>
-        function startMonitoring() {
-            var patientName = document.getElementById('patientName').value;
-            document.getElementById('patientNameDisplay').innerText = patientName;
-            document.getElementById('patientForm').style.display = 'none';
-            document.getElementById('monitoringSection').style.display = 'block';
-            initCharts();
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('heartRateValue').textContent = data.heart_rate + ' BPM';
+                    document.getElementById('oxygenLevelValue').textContent = data.oxygen_level + '%';
+                    const heartRatePercent = (data.heart_rate / 200) * 100;
+                    const oxygenLevelPercent = data.oxygen_level;
+                    document.getElementById('heartRateBar').style.width = heartRatePercent + '%';
+                    document.getElementById('oxygenLevelBar').style.width = oxygenLevelPercent + '%';
+                })
+                .catch(error => console.error('Error al obtener los datos:', error));
         }
-    
-        function initCharts() {
-            const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
-            new Chart(heartRateCtx, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        label: 'Heart Rate',
-                        data: [75, 125], // 75 es el valor actual, 125 es el valor restante hasta 200
-                        backgroundColor: ['rgb(255, 99, 132)', 'rgba(255, 99, 132, 0.1)'],
-                    }],
-                },
-                options: {
-                    circumference: 180,
-                    rotation: -90,
-                    cutout: '80%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    // Personaliza el texto del tooltip
-                                    if (context.datasetIndex === 0 && context.dataIndex === 0) { // Asegura que solo se modifique para el valor principal
-                                        return `Heart Rate: ${context.raw}`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-    
-            const oxygenLevelCtx = document.getElementById('oxygenLevelChart').getContext('2d');
-            new Chart(oxygenLevelCtx, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        label: 'Oxygen Level',
-                        data: [98, 2], // 98 es el valor actual, 2 es el valor restante hasta 100
-                        backgroundColor: ['rgb(54, 162, 235)', 'rgba(54, 162, 235, 0.1)'],
-                    }],
-                },
-                options: {
-                    circumference: 180,
-                    rotation: -90,
-                    cutout: '80%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    // Personaliza el texto del tooltip
-                                    if (context.datasetIndex === 0 && context.dataIndex === 0) { // Asegura que solo se modifique para el valor principal
-                                        return `Oxygen Level: ${context.raw}`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+        setInterval(fetchData, 100);
     </script>
-    
-
-<script>
-// Función para solicitar los datos del sensor y actualizar la página
-function fetchData() {
-    fetch('/data')
-        .then(response => response.json())
-        .then(data => {
-            // Actualiza los elementos del DOM con los nuevos valores
-            document.getElementById('heartRate').textContent = data.heart_rate + " BPM";
-            document.getElementById('oxygenLevel').textContent = data.oxygen_level + "%";
-        });
-}
-// Llamar a fetchData() cada segundo para obtener los datos actualizados
-setInterval(fetchData, 1000);
-</script>
-
-<script>
-// Función para solicitar los datos del sensor y actualizar los gráficos
-function updateGraphs() {
-    fetch('/data')
-        .then(response => response.json())
-        .then(data => {
-            // Suponiendo que los gráficos se inicializan en alguna parte del código como 'heartRateChart' y 'oxygenLevelChart'
-            // y que los datasets para la tasa de corazón y el nivel de oxígeno son el primer dataset de cada gráfico
-
-            // Actualiza el gráfico de la tasa de corazón
-            heartRateChart.data.labels.push(''); // Agrega una etiqueta de tiempo vacía o puedes poner la hora actual
-            heartRateChart.data.datasets[0].data.push(data.heart_rate);
-            if (heartRateChart.data.labels.length > 20) { // Limita a 20 datos para mantener el gráfico legible
-                heartRateChart.data.labels.shift();
-                heartRateChart.data.datasets[0].data.shift();
-            }
-            heartRateChart.update();
-
-            // Actualiza el gráfico del nivel de oxígeno
-            oxygenLevelChart.data.labels.push(''); // Similar, agrega una etiqueta de tiempo
-            oxygenLevelChart.data.datasets[0].data.push(data.oxygen_level);
-            if (oxygenLevelChart.data.labels.length > 20) {
-                oxygenLevelChart.data.labels.shift();
-                oxygenLevelChart.data.datasets[0].data.shift();
-            }
-            oxygenLevelChart.update();
-        });
-}
-
-// Llamar a updateGraphs() cada segundo para obtener los datos actualizados
-setInterval(updateGraphs, 1000);
-</script>
 </body>
 </html>

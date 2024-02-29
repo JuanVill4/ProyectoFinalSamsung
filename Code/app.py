@@ -21,10 +21,10 @@ def update_sensor_data():
     hrm.start_sensor()
     try:
         while True:
-            if hrm.bpm > 0 and hrm.spo2 > 0:
+            if hrm.bpm > 0 and hrm.spo2 > 0 and hrm.bpm < 150:
                 global latest_data
                 latest_data = {"heart_rate": hrm.bpm, "oxygen_level": int(hrm.spo2)}
-            time.sleep(1)
+            time.sleep(0.5)
     finally:
         hrm.stop_sensor()
 
