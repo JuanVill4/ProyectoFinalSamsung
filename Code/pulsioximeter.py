@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 import time
 from gpiozero import LED, Button
-
+from db import insert_medicion
 # Agrega la carpeta Oxigen al sys.path
 oxigen_path = Path(__file__).resolve().parent / 'Oxigen'
 sys.path.append(str(oxigen_path))
@@ -59,6 +59,7 @@ def display_sensor_data(hrm):
             if hrm.bpm > 0:      
                 draw.text((10, 25), f"Heart Rate: {int(hrm.bpm)} BPM", fill="white")
                 draw.text((10, 40), f"SpO2: {int(hrm.spo2)}%", fill="white")
+                insert_medicion(hrm.bpm, hrm.spo2)
                 led_verde.on()
                 led_rojo.off()
             else:
