@@ -6,7 +6,8 @@ import sys
 from pathlib import Path
 import time
 from gpiozero import LED, Button
-from db import insert_medicion
+from database import MonitoreoDB
+db = MonitoreoDB()
 # Agrega la carpeta Oxigen al sys.path
 oxigen_path = Path(__file__).resolve().parent / 'Oxigen'
 sys.path.append(str(oxigen_path))
@@ -41,6 +42,7 @@ def toggle_sistema():
     sistema_encendido = not sistema_encendido
     if sistema_encendido:
         print("Sistema encendido")
+        db.connect()
         device.show()  # Reactiva la pantalla OLED
 
     else:
@@ -48,6 +50,7 @@ def toggle_sistema():
         device.hide()  # Apaga la pantalla OLED
         led_verde.off()  # Asegura que el LED verde se apague cuando el sistema se apague
         led_rojo.off()  # Enciende el LED rojo para indicar que el sistema está apagado
+        db.close()
 
 boton.when_pressed = toggle_sistema
 
@@ -59,7 +62,7 @@ def display_sensor_data(hrm):
             if hrm.bpm > 0:      
                 draw.text((10, 25), f"Heart Rate: {int(hrm.bpm)} BPM", fill="white")
                 draw.text((10, 40), f"SpO2: {int(hrm.spo2)}%", fill="white")
-                insert_medicion(hrm.bpm, hrm.spo2)
+                db.insert_medicion(pulso_cardiaco=hrm.bpm, oxigenacion=hrm.spo2)
                 led_verde.on()
                 led_rojo.off()
             else:

@@ -29,8 +29,33 @@ class MonitoreoDB:
             self.connection.close()
             print("Conexión a MySQL cerrada")
 
-    def insert_medicion(self, pulso_cardiaco, oxigenacion):
-        """Función para insertar una medición en la base de datos."""
+    # def insert_medicion(self, pulso_cardiaco, oxigenacion):
+    #     """Función para insertar una medición en la base de datos."""
+    #     if not self.connection:
+    #         print("Conexión no establecida. Llame primero a connect().")
+    #         return
+
+    #     try:
+    #         cursor = self.connection.cursor()
+    #         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    #         # Insertar una nueva medición
+    #         query = "INSERT INTO mediciones (fecha_hora, pulso_cardiaco, oxigenacion) VALUES (%s, %s, %s)"
+    #         #query = "INSERT INTO sensor_distancia (distancia) VALUES (%s)"
+    #         cursor.execute(query, (now, pulso_cardiaco, oxigenacion))
+    #         #cursor.execute(query, (now, distancia))
+
+    #         # Confirmar la inserción
+    #         self.connection.commit()
+
+    #         print("Medición insertada exitosamente.")
+    #     except MySQLdb.Error as e:
+    #         print("Error al insertar los datos: ", e)
+    #     finally:
+    #         # Cerrar cursor
+    #         if cursor:
+    #             cursor.close()
+    def insert_medicion(self, **kwargs):
         if not self.connection:
             print("Conexión no establecida. Llame primero a connect().")
             return
@@ -39,23 +64,24 @@ class MonitoreoDB:
             cursor = self.connection.cursor()
             now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            # Insertar una nueva medición
-            query = "INSERT INTO mediciones (fecha_hora, pulso_cardiaco, oxigenacion) VALUES (%s, %s, %s)"
-            cursor.execute(query, (now, pulso_cardiaco, oxigenacion))
+            if 'distancia' in kwargs:
+                # Insertar solo distancia en la tabla sensor_distancia
+                query = "INSERT INTO sensor_distancia (fecha_hora, distancia) VALUES (%s, %s)"
+                cursor.execute(query, (now, kwargs['distancia']))
+            else:
+                # Insertar pulso cardiaco y oxigenación en la tabla mediciones
+                query = "INSERT INTO mediciones (fecha_hora, pulso_cardiaco, oxigenacion) VALUES (%s, %s, %s)"
+                cursor.execute(query, (now, kwargs.get('pulso_cardiaco', None), kwargs.get('oxigenacion', None)))
 
             # Confirmar la inserción
             self.connection.commit()
 
             print("Medición insertada exitosamente.")
-        except MySQLdb.Error as e:
+        except Exception as e:
             print("Error al insertar los datos: ", e)
         finally:
             # Cerrar cursor
             if cursor:
                 cursor.close()
 
-# Ejemplo de uso
-db_manager = DatabaseManager(user='tu_usuario', passwd='tu_contraseña', db='monitoring')
-db_manager.connect()
-db_manager.insert_medicion(80, 95)
-db_manager.close()
+
